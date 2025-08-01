@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="flex gap-6 mb-4 md:mb-0">
           <a href="#" className="hover:underline hover:font-bold transition-colors">Privacy Policy</a>
           <a href="#" className="hover:underline hover:font-bold transition-colors">Terms</a>
-          <a href="#" className="hover:underline hover:font-bold transition-colors">Contact</a>
+          <a href="/contact" className="hover:underline hover:font-bold transition-colors">Contact</a>
         </div>
         <div className="flex gap-5">
           <a href="#" aria-label="LinkedIn" className="hover:text-black font-bold transition-colors">
