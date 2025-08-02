@@ -4,10 +4,12 @@ import * as Icons from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
+type IconName = keyof typeof Icons;
+
 type Feature = {
   title: string;
   description: string;
-  icon: string;
+  icon: string; // we keep this as string because API might return invalid ones
 };
 
 export default function FeaturesSection() {
@@ -15,15 +17,18 @@ export default function FeaturesSection() {
 
   useEffect(() => {
     const fetchFeatures = async () => {
-      const res = await fetch("/api/features");
-      const data = await res.json();
-      setFeatures(data);
+      try {
+        const res = await fetch("/api/features");
+        const data = await res.json();
+        setFeatures(data);
+      } catch (error) {
+        console.error("Failed to load features:", error);
+      }
     };
 
     fetchFeatures();
   }, []);
 
-  
   const loopedFeatures = [...features, ...features];
 
   return (
@@ -47,7 +52,9 @@ export default function FeaturesSection() {
             }}
           >
             {loopedFeatures.map((feature, idx) => {
-              const Icon = (Icons as any)[feature.icon] || Icons["CalendarDaysIcon"];
+              const Icon =
+                Icons[feature.icon as IconName] ?? Icons["CalendarDaysIcon"];
+
               return (
                 <div
                   key={`${feature.title}-${idx}`}

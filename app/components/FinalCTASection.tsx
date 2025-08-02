@@ -24,8 +24,12 @@ export default function FinalCTASection() {
 
       setSubmitted(true);
       setEmail("");
-    } catch (err: any) {
-      setError(err.message || "Failed to subscribe.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "Failed to subscribe.");
+      } else {
+        setError("Failed to subscribe.");
+      }
     }
   };
 
@@ -61,7 +65,7 @@ export default function FinalCTASection() {
           </button>
         </form>
 
-        {submitted && <div className="mt-6 text-green-600">You're on the list! 🎉</div>}
+        {submitted && <div className="mt-6 text-green-600">You&apos;re on the list! 🎉</div>}
         {error && <div className="mt-6 text-red-600">{error}</div>}
       </div>
     </section>

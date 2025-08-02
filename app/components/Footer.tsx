@@ -1,4 +1,3 @@
-import { EnvelopeIcon } from "@heroicons/react/24/outline";
 import { Linkedin, Github, Twitter } from "lucide-react";
 
 export default function Footer() {
