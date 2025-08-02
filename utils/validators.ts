@@ -1,4 +1,4 @@
-// backend/utils/validators.ts
+//utils/validators.ts
 import { z } from 'zod';
 
 export const emailSchema = z.string().email();

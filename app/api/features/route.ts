@@ -1,7 +1,7 @@
 // app/api/features/route.ts
 import { NextResponse } from "next/server";
-import { connectDB } from "../../../lib/db";
-import Feature from "../../../models/Feature";
+import { connectDB } from "@/lib/db";
+import Feature from "@/models/Feature";
 
 export async function GET() {
   try {

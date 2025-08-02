@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectDB } from '../../../lib/db';
-import Contact from '../../../models/Contact';
-import { contactSchema } from '../../../utils/validators';
+import { connectDB } from '@/lib/db';
+import Contact from '@/models/Contact';
+import { contactSchema } from '@/utils/validators';
 
 const rateLimitMap = new Map();
 const RATE_LIMIT = 5;

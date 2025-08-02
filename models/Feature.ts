@@ -1,4 +1,4 @@
-// backend/models/Feature.ts
+//models/Feature.ts
 import mongoose from "mongoose";
 
 const featureSchema = new mongoose.Schema({

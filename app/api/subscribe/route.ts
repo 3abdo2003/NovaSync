@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectDB } from '../../../lib/db';
-import Subscriber from '../../../models/Subscriber';
-import { subscribeSchema } from '../../../utils/validators';
+import { connectDB } from '@/lib/db';
+import Subscriber from '@/models/Subscriber';
+import { subscribeSchema } from '@/utils/validators';
 
 // Simple in-memory rate limiter
 const rateLimitMap = new Map<string, { count: number; last: number }>();
