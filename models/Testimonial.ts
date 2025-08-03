@@ -1,4 +1,3 @@
-//models/Testimonial.ts
 import mongoose, { Schema, model, models } from 'mongoose';
 
 const testimonialSchema = new Schema({

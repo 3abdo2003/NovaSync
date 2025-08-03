@@ -1,4 +1,3 @@
-//models/Subscriber.ts
 import mongoose, { Schema, models, model } from 'mongoose';
 
 const subscriberSchema = new Schema(

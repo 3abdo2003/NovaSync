@@ -16,6 +16,12 @@ export async function POST(request: Request) {
   try {
     await connectDB();
     const { name, quote } = await request.json();
+    
+    // Validate required fields
+    if (!name || !quote) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+    
     const testimonial = new Testimonial({ name, quote });
     await testimonial.save();
     return NextResponse.json(testimonial, { status: 201 });

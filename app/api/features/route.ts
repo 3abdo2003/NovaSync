@@ -16,6 +16,12 @@ export async function POST(req: Request) {
   try {
     await connectDB();
     const { title, description, icon } = await req.json();
+    
+    // Validate required fields
+    if (!title || !description || !icon) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+    
     const newFeature = new Feature({ title, description, icon });
     await newFeature.save();
     return NextResponse.json(newFeature, { status: 201 });
