@@ -10,9 +10,7 @@ const nextConfig: NextConfig = {
     return config;
   },
   // Ensure server components can use mongoose
-  experimental: {
-    serverComponentsExternalPackages: ['mongoose']
-  },
+  serverExternalPackages: ['mongoose'],
   // Disable static optimization for API routes
   output: 'standalone'
 };

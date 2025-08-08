@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   try {
     await Contact.create(parse.data);
     return NextResponse.json({ message: 'Inquiry submitted' });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

@@ -8,7 +8,7 @@ export async function GET() {
     await connectDB();
     const testimonials = await Testimonial.find().lean();
     return NextResponse.json(testimonials);
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Failed to fetch testimonials' }, { status: 500 });
   }
 }
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     const testimonial = new Testimonial({ name, quote });
     await testimonial.save();
     return NextResponse.json(testimonial, { status: 201 });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Failed to create testimonial' }, { status: 500 });
   }
 }

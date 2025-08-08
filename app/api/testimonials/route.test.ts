@@ -1,6 +1,6 @@
 // app/api/testimonials/route.test.ts
 
-function makeRequest(body?: any, opts?: { throwOnJson?: boolean }) {
+function makeRequest(body?: unknown, opts?: { throwOnJson?: boolean }) {
   return {
     json: async () => {
       if (opts?.throwOnJson) throw new Error("bad json");
@@ -17,13 +17,13 @@ const loadWithMocks = async () => {
   }));
 
   await jest.unstable_mockModule("@/models/Testimonial", () => {
-    const Testimonial: any = function (this: any, doc: any) { Object.assign(this, doc); };
+    const Testimonial = function (this: { _id?: string; name?: string; quote?: string }, doc: Record<string, unknown>) { Object.assign(this, doc); };
     Testimonial.find = jest.fn();
     Testimonial.prototype.save = jest.fn();
     return { __esModule: true, default: Testimonial };
   });
 
-  const Testimonial = (await import("@/models/Testimonial")).default as any;
+  const Testimonial = (await import("@/models/Testimonial")).default as { find: jest.Mock; prototype: { save: jest.Mock } };
   const route = await import("./route");
 
   return { ...route, Testimonial };
@@ -36,7 +36,7 @@ describe("GET /api/testimonials", () => {
       { _id: "1", name: "Alice", quote: "Great!" },
       { _id: "2", name: "Bob", quote: "Awesome!" },
     ]);
-    jest.spyOn(Testimonial, "find").mockReturnValue({ lean } as any);
+    jest.spyOn(Testimonial, "find").mockReturnValue({ lean } as { lean: jest.Mock });
     const res = await GET();
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual([
@@ -48,7 +48,7 @@ describe("GET /api/testimonials", () => {
   test("returns 200 with empty array", async () => {
     const { GET, Testimonial } = await loadWithMocks();
     const lean = jest.fn().mockResolvedValue([]);
-    jest.spyOn(Testimonial, "find").mockReturnValue({ lean } as any);
+    jest.spyOn(Testimonial, "find").mockReturnValue({ lean } as { lean: jest.Mock });
     const res = await GET();
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual([]);
@@ -57,7 +57,7 @@ describe("GET /api/testimonials", () => {
   test("returns 500 when find().lean() rejects", async () => {
     const { GET, Testimonial } = await loadWithMocks();
     const lean = jest.fn().mockRejectedValue(new Error("boom"));
-    jest.spyOn(Testimonial, "find").mockReturnValue({ lean } as any);
+    jest.spyOn(Testimonial, "find").mockReturnValue({ lean } as { lean: jest.Mock });
     const res = await GET();
     expect(res.status).toBe(500);
     expect(await res.json()).toEqual({ error: "Failed to fetch testimonials" });
@@ -75,7 +75,7 @@ describe("GET /api/testimonials", () => {
 describe("POST /api/testimonials", () => {
   test("returns 201 and created testimonial on valid body", async () => {
     const { POST, Testimonial } = await loadWithMocks();
-    jest.spyOn(Testimonial.prototype, "save").mockImplementation(function (this: any) {
+    jest.spyOn(Testimonial.prototype, "save").mockImplementation(function (this: { _id?: string }) {
       if (!this._id) this._id = "abc123"; return Promise.resolve();
     });
     const res = await POST(makeRequest({ name: "Carol", quote: "Love it" }));

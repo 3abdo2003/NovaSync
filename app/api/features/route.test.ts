@@ -1,6 +1,6 @@
 // app/api/features/route.test.ts
 
-function makeRequest(body?: any, opts?: { throwOnJson?: boolean }) {
+function makeRequest(body?: unknown, opts?: { throwOnJson?: boolean }) {
   return {
     json: async () => {
       if (opts?.throwOnJson) throw new Error("bad json");
@@ -16,13 +16,13 @@ const loadWithMocks = async () => {
     connectDB: jest.fn().mockResolvedValue(undefined),
   }));
   await jest.unstable_mockModule("@/models/Feature", () => {
-    const Feature: any = function (this: any, doc: any) { Object.assign(this, doc); };
+    const Feature = function (this: { _id?: string; title?: string; description?: string; icon?: string }, doc: Record<string, unknown>) { Object.assign(this, doc); };
     Feature.find = jest.fn();
     Feature.prototype.save = jest.fn();
     return { __esModule: true, default: Feature };
   });
 
-  const Feature = (await import("@/models/Feature")).default as any;
+  const Feature = (await import("@/models/Feature")).default as { find: jest.Mock; prototype: { save: jest.Mock } };
   const route = await import("./route");
   return { ...route, Feature };
 };
@@ -35,7 +35,7 @@ describe("GET /api/features", () => {
       { _id: "1", title: "A", description: "aa", icon: "a.svg" },
       { _id: "2", title: "B", description: "bb", icon: "b.svg" },
     ]);
-    jest.spyOn(Feature, "find").mockReturnValue({ lean } as any);
+    jest.spyOn(Feature, "find").mockReturnValue({ lean } as { lean: jest.Mock });
 
     const res = await GET();
     expect(res.status).toBe(200);
@@ -48,7 +48,7 @@ describe("GET /api/features", () => {
   test("returns 200 with empty array", async () => {
     const { GET, Feature } = await loadWithMocks();
     const lean = jest.fn().mockResolvedValue([]);
-    jest.spyOn(Feature, "find").mockReturnValue({ lean } as any);
+    jest.spyOn(Feature, "find").mockReturnValue({ lean } as { lean: jest.Mock });
     const res = await GET();
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual([]);
@@ -57,7 +57,7 @@ describe("GET /api/features", () => {
   test("returns 500 when find().lean() rejects", async () => {
     const { GET, Feature } = await loadWithMocks();
     const lean = jest.fn().mockRejectedValue(new Error("boom"));
-    jest.spyOn(Feature, "find").mockReturnValue({ lean } as any);
+    jest.spyOn(Feature, "find").mockReturnValue({ lean } as { lean: jest.Mock });
     const res = await GET();
     expect(res.status).toBe(500);
     expect(await res.json()).toEqual({ error: "Failed to fetch features" });
@@ -75,7 +75,7 @@ describe("GET /api/features", () => {
 describe("POST /api/features", () => {
   test("returns 201 and created feature on valid body", async () => {
     const { POST, Feature } = await loadWithMocks();
-    jest.spyOn(Feature.prototype, "save").mockImplementation(function (this: any) {
+    jest.spyOn(Feature.prototype, "save").mockImplementation(function (this: { _id?: string }) {
       if (!this._id) this._id = "abc123"; return Promise.resolve();
     });
     const body = { title: "X", description: "desc", icon: "x.svg" };

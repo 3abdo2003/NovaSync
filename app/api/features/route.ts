@@ -8,7 +8,7 @@ export async function GET() {
     await connectDB();
     const features = await Feature.find().lean();
     return NextResponse.json(features);
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Failed to fetch features" }, { status: 500 });
   }
 }
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     const newFeature = new Feature({ title, description, icon });
     await newFeature.save();
     return NextResponse.json(newFeature, { status: 201 });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Failed to create feature" }, { status: 500 });
   }
 }

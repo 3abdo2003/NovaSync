@@ -1,7 +1,7 @@
 // app/api/contact/route.test.ts
 
 // Minimal Request builder with ability to throw on json()
-function makeRequest(body?: any, opts?: { throwOnJson?: boolean; ip?: string }) {
+function makeRequest(body?: unknown, opts?: { throwOnJson?: boolean; ip?: string }) {
   const headers = new Map<string, string>();
   if (opts?.ip !== undefined) headers.set("x-forwarded-for", opts.ip);
   return {
@@ -26,10 +26,10 @@ const loadWithMocks = async () => {
   }));
   await jest.unstable_mockModule("@/utils/validators", () => ({
     __esModule: true,
-    contactSchema: { safeParse: (_: any) => ({ success: true, data: {} }) },
+    contactSchema: { safeParse: () => ({ success: true, data: {} }) },
   }));
 
-  const Contact = (await import("@/models/Contact")).default as any;
+  const Contact = (await import("@/models/Contact")).default as { create: jest.Mock };
   const { contactSchema } = await import("@/utils/validators");
   const { POST } = await import("./route");
 
@@ -43,8 +43,8 @@ describe("POST /api/contact", () => {
     jest.spyOn(contactSchema, "safeParse").mockReturnValue({
       success: true,
       data: { name: "Ahmed", email: "a@b.com", message: "Hi" },
-    } as any);
-    const createSpy = jest.spyOn(Contact, "create").mockResolvedValue({ _id: "abc123" } as any);
+    } as { success: true; data: { name: string; email: string; message: string } });
+    const createSpy = jest.spyOn(Contact, "create").mockResolvedValue({ _id: "abc123" } as { _id: string });
 
     const res = await POST(makeRequest({ name: "Ahmed", email: "a@b.com", message: "Hi" }, { ip: "10.0.0.1" }));
     const json = await res.json();
@@ -57,7 +57,7 @@ describe("POST /api/contact", () => {
   test("returns 400 on validation error", async () => {
     const { POST, contactSchema, Contact } = await loadWithMocks();
 
-    jest.spyOn(contactSchema, "safeParse").mockReturnValue({ success: false, error: { issues: [] } } as any);
+    jest.spyOn(contactSchema, "safeParse").mockReturnValue({ success: false, error: { issues: [] } } as { success: false; error: { issues: unknown[] } });
     const createSpy = jest.spyOn(Contact, "create");
 
     const res = await POST(makeRequest({ bad: "data" }, { ip: "10.0.0.2" }));
@@ -74,7 +74,7 @@ describe("POST /api/contact", () => {
     jest.spyOn(contactSchema, "safeParse").mockReturnValue({
       success: true,
       data: { name: "X", email: "x@y.com", message: "Yo" },
-    } as any);
+    } as { success: true; data: { name: string; email: string; message: string } });
     jest.spyOn(Contact, "create").mockRejectedValue(new Error("DB down"));
 
     const res = await POST(makeRequest({ name: "X", email: "x@y.com", message: "Yo" }, { ip: "10.0.0.3" }));
@@ -87,8 +87,8 @@ describe("POST /api/contact", () => {
   test("rate limits after 5 requests per IP", async () => {
     const { POST, contactSchema, Contact } = await loadWithMocks();
 
-    jest.spyOn(contactSchema, "safeParse").mockReturnValue({ success: true, data: { name: "A", email: "a@a.com", message: "m" } } as any);
-    jest.spyOn(Contact, "create").mockResolvedValue({ _id: "ok" } as any);
+    jest.spyOn(contactSchema, "safeParse").mockReturnValue({ success: true, data: { name: "A", email: "a@a.com", message: "m" } } as { success: true; data: { name: string; email: string; message: string } });
+    jest.spyOn(Contact, "create").mockResolvedValue({ _id: "ok" } as { _id: string });
 
     const ip = "55.55.55.55";
     for (let i = 0; i < 5; i++) expect((await POST(makeRequest({}, { ip }))).status).toBe(200);
@@ -99,8 +99,8 @@ describe("POST /api/contact", () => {
   test("rate limit is per IP (different IP allowed)", async () => {
     const { POST, contactSchema, Contact } = await loadWithMocks();
 
-    jest.spyOn(contactSchema, "safeParse").mockReturnValue({ success: true, data: {} } as any);
-    jest.spyOn(Contact, "create").mockResolvedValue({ _id: "ok" } as any);
+    jest.spyOn(contactSchema, "safeParse").mockReturnValue({ success: true, data: {} } as { success: true; data: Record<string, unknown> });
+    jest.spyOn(Contact, "create").mockResolvedValue({ _id: "ok" } as { _id: string });
 
     for (let i = 0; i < 6; i++) await POST(makeRequest({}, { ip: "1.1.1.1" }));
     const res = await POST(makeRequest({}, { ip: "2.2.2.2" }));
@@ -110,8 +110,8 @@ describe("POST /api/contact", () => {
   test("uses 'unknown' bucket when no x-forwarded-for", async () => {
     const { POST, contactSchema, Contact } = await loadWithMocks();
 
-    jest.spyOn(contactSchema, "safeParse").mockReturnValue({ success: true, data: {} } as any);
-    jest.spyOn(Contact, "create").mockResolvedValue({ _id: "ok" } as any);
+    jest.spyOn(contactSchema, "safeParse").mockReturnValue({ success: true, data: {} } as { success: true; data: Record<string, unknown> });
+    jest.spyOn(Contact, "create").mockResolvedValue({ _id: "ok" } as { _id: string });
 
     for (let i = 0; i < 5; i++) expect((await POST(makeRequest({}, { ip: undefined }))).status).toBe(200);
     const res6 = await POST(makeRequest({}, { ip: undefined }));

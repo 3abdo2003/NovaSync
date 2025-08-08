@@ -1,6 +1,6 @@
 // app/api/subscribe/route.test.ts
 
-function makeRequest(body?: any, opts?: { throwOnJson?: boolean; ip?: string }) {
+function makeRequest(body?: unknown, opts?: { throwOnJson?: boolean; ip?: string }) {
   const headers = new Map<string, string>();
   if (opts?.ip !== undefined) headers.set("x-forwarded-for", opts.ip);
   return {
@@ -24,10 +24,10 @@ const loadWithMocks = async () => {
   }));
   await jest.unstable_mockModule("@/utils/validators", () => ({
     __esModule: true,
-    subscribeSchema: { safeParse: (_: any) => ({ success: true, data: {} }) },
+    subscribeSchema: { safeParse: () => ({ success: true, data: {} }) },
   }));
 
-  const Subscriber = (await import("@/models/Subscriber")).default as any;
+  const Subscriber = (await import("@/models/Subscriber")).default as { findOne: jest.Mock; create: jest.Mock };
   const { subscribeSchema } = await import("@/utils/validators");
   const { POST } = await import("./route");
 
@@ -48,7 +48,7 @@ describe("POST /api/subscribe", () => {
   test("200 when email is valid and not subscribed", async () => {
     const { POST, Subscriber, subscribeSchema } = await loadWithMocks();
 
-    jest.spyOn(subscribeSchema, "safeParse").mockReturnValue({ success: true, data: { email: "ok@example.com" } } as any);
+    jest.spyOn(subscribeSchema, "safeParse").mockReturnValue({ success: true, data: { email: "ok@example.com" } } as { success: true; data: { email: string } });
     jest.spyOn(Subscriber, "findOne").mockResolvedValue(null);
     jest.spyOn(Subscriber, "create").mockResolvedValue({ _id: "id1" });
 
@@ -60,7 +60,7 @@ describe("POST /api/subscribe", () => {
   test("400 when validation fails", async () => {
     const { POST, subscribeSchema, Subscriber } = await loadWithMocks();
 
-    jest.spyOn(subscribeSchema, "safeParse").mockReturnValue({ success: false, error: { issues: [] } } as any);
+    jest.spyOn(subscribeSchema, "safeParse").mockReturnValue({ success: false, error: { issues: [] } } as { success: false; error: { issues: unknown[] } });
     const findSpy = jest.spyOn(Subscriber, "findOne");
     const createSpy = jest.spyOn(Subscriber, "create");
 
@@ -74,7 +74,7 @@ describe("POST /api/subscribe", () => {
   test("409 when email already subscribed", async () => {
     const { POST, Subscriber, subscribeSchema } = await loadWithMocks();
 
-    jest.spyOn(subscribeSchema, "safeParse").mockReturnValue({ success: true, data: { email: "dup@example.com" } } as any);
+    jest.spyOn(subscribeSchema, "safeParse").mockReturnValue({ success: true, data: { email: "dup@example.com" } } as { success: true; data: { email: string } });
     jest.spyOn(Subscriber, "findOne").mockResolvedValue({ _id: "exists" });
 
     const res = await POST(makeRequest({ email: "dup@example.com" }, { ip: "1.2.3.4" }));
@@ -85,7 +85,7 @@ describe("POST /api/subscribe", () => {
   test("429 after 5 requests from the same IP", async () => {
     const { POST, Subscriber, subscribeSchema } = await loadWithMocks();
 
-    jest.spyOn(subscribeSchema, "safeParse").mockReturnValue({ success: true, data: { email: "x@x.com" } } as any);
+    jest.spyOn(subscribeSchema, "safeParse").mockReturnValue({ success: true, data: { email: "x@x.com" } } as { success: true; data: { email: string } });
     jest.spyOn(Subscriber, "findOne").mockResolvedValue(null);
     jest.spyOn(Subscriber, "create").mockResolvedValue({ _id: "ok" });
 
@@ -97,7 +97,7 @@ describe("POST /api/subscribe", () => {
 
   test("500 when req.json() throws", async () => {
     const { POST, subscribeSchema } = await loadWithMocks();
-    jest.spyOn(subscribeSchema, "safeParse").mockReturnValue({ success: true, data: { email: "ok@example.com" } } as any);
+    jest.spyOn(subscribeSchema, "safeParse").mockReturnValue({ success: true, data: { email: "ok@example.com" } } as { success: true; data: { email: string } });
     const res = await POST(makeRequest(undefined, { throwOnJson: true, ip: "9.9.9.9" }));
     expect(res.status).toBe(500);
     expect(await res.json()).toEqual({ error: "Server error. Please try again." });
